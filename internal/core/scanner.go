@@ -21,6 +21,7 @@ func NewScanner(source string) *scanner {
 	return &scanner{
 		source: source,
 		line:   1,
+		length: len(source),
 	}
 }
 
@@ -37,51 +38,51 @@ func (s *scanner) scanTokens() {
 func (s *scanner) scanToken() {
 	c := s.advance()
 	switch c {
-	case "(":
+	case '(':
 		s.addToken(LEFT_PAREN)
-	case ")":
+	case ')':
 		s.addToken(RIGHT_PAREN)
-	case "{":
+	case '{':
 		s.addToken(LEFT_BRACE)
-	case "}":
+	case '}':
 		s.addToken(RIGHT_BRACE)
-	case ",":
+	case ',':
 		s.addToken(COMMA)
-	case ".":
+	case '.':
 		s.addToken(DOT)
-	case "-":
+	case '-':
 		s.addToken(MINUS)
-	case "+":
+	case '+':
 		s.addToken(PLUS)
-	case ";":
+	case ';':
 		s.addToken(SEMICOLON)
-	case "*":
+	case '*':
 		s.addToken(STAR)
-	case "!":
+	case '!':
 		if s.match("=") {
 			s.addToken(BANG_EQUAL)
 		} else {
 			s.addToken(BANG)
 		}
-	case "=":
+	case '=':
 		if s.match("=") {
 			s.addToken(EQUAL_EQUAL)
 		} else {
 			s.addToken(EQUAL)
 		}
-	case "<":
+	case '<':
 		if s.match("=") {
 			s.addToken(LESS_EQUAL)
 		} else {
 			s.addToken(LESS)
 		}
-	case ">":
+	case '>':
 		if s.match("=") {
 			s.addToken(GREATER_EQUAL)
 		} else {
 			s.addToken(GREATER)
 		}
-	case "/":
+	case '/':
 		if s.match("/") {
 			for s.peek() != '\n' && !s.isAtEnd() {
 				s.advance()
@@ -89,21 +90,22 @@ func (s *scanner) scanToken() {
 		} else {
 			s.addToken(SLASH)
 		}
-	case " ", "\r", " \t":
-	case "\n":
+	case ' ', '\r', '\t':
+	case '\n':
 		s.line += 1
-	case "\"":
+	case '"':
 		str := s.string()
 		s.addTokenValue(STRING, str)
 	default:
-		if s.isDigit(s.peek()) {
+		if s.isDigit(c) {
 			v := s.number()
 			s.addTokenValue(NUMBER, v)
-		} else if s.isAlpha(s.peek()) {
+		} else if s.isAlpha(c) {
 			v := s.identifier()
 			s.tokens = append(s.tokens, v)
+		} else {
+			logrus.Errorf("invalid char: %s at line %d", c, s.line)
 		}
-		logrus.Errorf("invalid char: %s at line %d", c, s.line)
 	}
 }
 
@@ -111,11 +113,11 @@ func (s *scanner) isAtEnd() bool {
 	return s.current >= s.length
 }
 
-func (s *scanner) advance() string {
+func (s *scanner) advance() rune {
 	if s.isAtEnd() {
-		return ""
+		return '0'
 	}
-	emit := s.source[s.current : s.current+1]
+	emit := rune(s.source[s.current])
 	s.current += 1
 	return emit
 }
@@ -147,7 +149,7 @@ func (s *scanner) peekNext() rune {
 }
 
 func (s *scanner) string() string {
-	for s.peek() != 0 && !s.isAtEnd() {
+	for s.peek() != '"' && !s.isAtEnd() {
 		if s.peek() == '\n' {
 			s.line += 1
 		}

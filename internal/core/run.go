@@ -13,8 +13,7 @@ func RunFile(path string) error {
 		return err
 	}
 
-	// TODO: implement
-	_ = data
+	run(string(data))
 	return nil
 }
 
@@ -37,6 +36,6 @@ func run(source string) {
 	scan.scanTokens()
 
 	for _, v := range scan.tokens {
-		fmt.Printf("token: %v\n", v)
+		fmt.Printf("token: %+v\n", v)
 	}
 }

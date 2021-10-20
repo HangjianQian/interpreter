@@ -11,11 +11,7 @@ func NewToken(kind TokenKind, lexeme string, literal interface{}, line int) Toke
 	return Token{
 		kind:    kind,
 		lexeme:  lexeme,
-		literal: line,
+		literal: literal,
 		line:    line,
 	}
-}
-
-func (t Token) String() string {
-	return ""
 }
