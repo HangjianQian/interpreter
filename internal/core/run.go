@@ -38,4 +38,8 @@ func run(source string) {
 	for _, v := range scan.tokens {
 		fmt.Printf("token: %+v\n", v)
 	}
+
+	parser := NewParser(scan.tokens)
+	expr := parser.expression()
+	fmt.Printf("expr %+v\n", expr)
 }
