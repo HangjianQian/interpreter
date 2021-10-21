@@ -32,7 +32,6 @@ func (s *scanner) scanTokens() {
 	}
 
 	s.tokens = append(s.tokens, NewToken(EOF, "", nil, s.line))
-	return
 }
 
 func (s *scanner) scanToken() {

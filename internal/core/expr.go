@@ -81,6 +81,8 @@ func evaluate(expr Expr) interface{} {
 		return v.evaluate()
 	case UnaryExpr:
 		return v.evaluate()
+	case GroupExpr:
+		return v.evaluate()
 	case LiteralExpr:
 		return v.evaluate()
 	}
