@@ -42,4 +42,5 @@ func run(source string) {
 	parser := NewParser(scan.tokens)
 	expr := parser.expression()
 	fmt.Printf("expr %+v\n", expr)
+	fmt.Printf("evaluate: %v\n", evaluate(expr))
 }
