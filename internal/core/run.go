@@ -40,7 +40,11 @@ func run(source string) {
 	}
 
 	parser := NewParser(scan.tokens)
-	expr := parser.expression()
-	fmt.Printf("expr %+v\n", expr)
-	fmt.Printf("evaluate: %v\n", evaluate(expr))
+	stmts := parser.doParse()
+	fmt.Printf("stmt s%+v\n", stmts)
+
+	inter := NewInterpreter()
+	for _, s := range stmts {
+		fmt.Printf("res: %v\n", inter.interpret(s))
+	}
 }

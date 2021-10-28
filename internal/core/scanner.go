@@ -198,7 +198,7 @@ func (s *scanner) identifier() Token {
 		s.advance()
 	}
 
-	str := s.source[s.start : s.current+1]
+	str := s.source[s.start:s.current]
 
 	// keywords ?
 	if v, ok := KEYWORDS[str]; ok {

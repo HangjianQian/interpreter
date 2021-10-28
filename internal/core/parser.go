@@ -12,6 +12,43 @@ func NewParser(t []Token) *Parser {
 	}
 }
 
+// 返回全部的声明和语句，不进行 evaluate 操作
+func (p *Parser) doParse() []Stmt {
+	var stmts []Stmt
+	for !p.isAtEnd() {
+		stmts = append(stmts, p.declaration())
+	}
+	return stmts
+}
+
+func (p *Parser) declaration() Stmt {
+	if p.match(VAR) {
+		return p.varDeclaration()
+	}
+	return p.statement()
+}
+
+func (p *Parser) varDeclaration() Stmt {
+	name := p.consume(IDENTIFIER, "expected identifier name")
+
+	var initializer Expr
+	if p.match(EQUAL) {
+		initializer = p.expression()
+	}
+	p.consume(SEMICOLON, "Expect ';' after expression.")
+	return VarStmt{name: name, initializer: initializer}
+}
+
+func (p *Parser) statement() Stmt {
+	return p.expressionStmt()
+}
+
+func (p *Parser) expressionStmt() Stmt {
+	ex := p.expression()
+	p.consume(SEMICOLON, "Expect ';' after expression.")
+	return ExprStmt{expr: ex}
+}
+
 func (p *Parser) expression() Expr {
 	return p.equality()
 }
@@ -97,6 +134,11 @@ func (p *Parser) primary() Expr {
 	if p.match(NUMBER, STRING) {
 		return LiteralExpr{obj: p.previous().literal}
 	}
+	if p.match(IDENTIFIER) {
+		return VarExpr{
+			name: p.previous(),
+		}
+	}
 	if p.match(LEFT_PAREN) {
 		ex := p.expression()
 		p.consume(RIGHT_PAREN, "EXPECT ')'")
@@ -140,7 +182,7 @@ func (p *Parser) check(tk TokenKind) bool {
 }
 
 func (p *Parser) consume(tk TokenKind, msg string) Token {
-	if p.match(tk) {
+	if p.check(tk) {
 		return p.advance()
 	}
 	panic(msg)

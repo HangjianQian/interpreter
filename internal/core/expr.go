@@ -75,8 +75,13 @@ func (l LiteralExpr) evaluate() interface{} {
 	return l.obj
 }
 
-func evaluate(expr Expr) interface{} {
-	switch v := expr.(type) {
+type VarExpr struct {
+	name Token
+}
+
+// deprecate
+func evaluate(e Expr) interface{} {
+	switch v := e.(type) {
 	case BinaryExpr:
 		return v.evaluate()
 	case UnaryExpr:
@@ -85,6 +90,7 @@ func evaluate(expr Expr) interface{} {
 		return v.evaluate()
 	case LiteralExpr:
 		return v.evaluate()
+	case VarExpr:
 	}
 	return nil
 }
