@@ -25,6 +25,8 @@ func (i *Interpreter) interpret(s interface{}) interface{} {
 		return v.evaluate()
 	case VarExpr:
 		return i.evaluateVarExpr(v)
+	case LogicalExpr:
+		return i.evaluateLogicalStmt(v)
 	case VarStmt:
 		return i.evaluateVarStmt(v)
 	case ExprStmt:
@@ -33,8 +35,8 @@ func (i *Interpreter) interpret(s interface{}) interface{} {
 		return i.evaluateBlockStmt(v, NewEnv(i.env))
 	case IfStmt:
 		return i.evaluateIfStmt(v)
-	case LogicalExpr:
-		return i.evaluateLogicalStmt(v)
+	case WhileStmt:
+		return i.evaluateWhileStmt(v)
 	}
 	return nil
 }
@@ -139,4 +141,11 @@ func (i *Interpreter) evaluateLogicalStmt(v LogicalExpr) interface{} {
 		return false
 	}
 	return i.interpret(v.right).(bool)
+}
+
+func (i *Interpreter) evaluateWhileStmt(v WhileStmt) interface{} {
+	for i.interpret(v.condition).(bool) {
+		i.interpret(v.body)
+	}
+	return nil
 }

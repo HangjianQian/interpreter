@@ -20,3 +20,8 @@ type IfStmt struct {
 	thenBranch Stmt
 	elseBranch Stmt
 }
+
+type WhileStmt struct {
+	condition Expr
+	body      Stmt
+}

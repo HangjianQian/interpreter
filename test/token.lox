@@ -1,6 +1,8 @@
 var a = 233;
 var b = false;
 var c = 1;
-if (!b) {
-    c = a;
+while (c<1000) {
+    if (!b) {
+        c = c + a;
+    }
 }
