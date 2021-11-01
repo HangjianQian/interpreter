@@ -1,5 +1,7 @@
 package core
 
+import "fmt"
+
 type Parser struct {
 	tokens  []Token
 	current int
@@ -50,7 +52,26 @@ func (p *Parser) expressionStmt() Stmt {
 }
 
 func (p *Parser) expression() Expr {
-	return p.equality()
+	return p.assignment()
+}
+
+func (p *Parser) assignment() Expr {
+	ex := p.equality()
+
+	if p.match(EQUAL) {
+		equals := p.previous()
+		value := p.assignment()
+
+		if _, ok := ex.(VarExpr); ok {
+			name := ex.(VarExpr).name
+			return AssignExpr{
+				name:  name,
+				value: value,
+			}
+		}
+		panic(fmt.Sprintf("invalid assign target, %+v", equals))
+	}
+	return ex
 }
 
 func (p *Parser) equality() Expr {

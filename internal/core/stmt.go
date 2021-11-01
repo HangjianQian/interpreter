@@ -11,6 +11,6 @@ type VarStmt struct {
 	initializer Expr
 }
 
-func (v VarStmt) evaluate() {
-	
+type IfStmt struct {
+
 }

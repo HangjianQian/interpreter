@@ -79,6 +79,11 @@ type VarExpr struct {
 	name Token
 }
 
+type AssignExpr struct {
+	name  Token
+	value Expr
+}
+
 // deprecate
 func evaluate(e Expr) interface{} {
 	switch v := e.(type) {

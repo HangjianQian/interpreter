@@ -1,3 +1,4 @@
 var a=1*2;
 var b=2*3;
-var c=a+b;
+var c=1;
+c=a+b+3;

@@ -13,6 +13,8 @@ func NewInterpreter() *Interpreter {
 func (i *Interpreter) interpret(s interface{}) interface{} {
 	// TODO: fix
 	switch v := s.(type) {
+	case AssignExpr:
+		return i.evaluateAssignExpr(v)
 	case BinaryExpr:
 		return i.evaluateBinaryExpr(v)
 	case UnaryExpr:
@@ -25,8 +27,16 @@ func (i *Interpreter) interpret(s interface{}) interface{} {
 		return i.evaluateVarExpr(v)
 	case VarStmt:
 		return i.evaluateVarStmt(v)
+	case ExprStmt:
+		return i.evaluateExprStmt(v)
 	}
 	return nil
+}
+
+func (i *Interpreter) evaluateAssignExpr(a AssignExpr) interface{} {
+	value := i.interpret(a.value)
+	i.env.assign(a.name, value)
+	return value
 }
 
 func (i *Interpreter) evaluateBinaryExpr(b BinaryExpr) interface{} {
@@ -75,5 +85,10 @@ func (i *Interpreter) evaluateVarStmt(v VarStmt) interface{} {
 		obj = i.interpret(v.initializer)
 	}
 	i.env.define(v.name.lexeme, obj)
+	return nil
+}
+
+func (i *Interpreter) evaluateExprStmt(v ExprStmt) interface{} {
+	i.interpret(v.expr)
 	return nil
 }
