@@ -19,6 +19,11 @@ func (e *Env) assign(t Token, v interface{}) {
 		e.values[t.lexeme] = v
 		return
 	}
+
+	if e.enclosing != nil {
+		e.enclosing.assign(t, v)
+		return
+	}
 	panic(fmt.Sprintf("assign, map key not exist: %s", t.lexeme))
 }
 

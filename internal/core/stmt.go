@@ -16,4 +16,7 @@ type BlockStmt struct {
 }
 
 type IfStmt struct {
+	condition  Expr
+	thenBranch Stmt
+	elseBranch Stmt
 }

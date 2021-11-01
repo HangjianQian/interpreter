@@ -84,6 +84,12 @@ type AssignExpr struct {
 	value Expr
 }
 
+type LogicalExpr struct {
+	left     Expr
+	right    Expr
+	operator Token
+}
+
 // deprecate
 func evaluate(e Expr) interface{} {
 	switch v := e.(type) {

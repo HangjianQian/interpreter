@@ -18,7 +18,7 @@ func (i *Interpreter) interpret(s interface{}) interface{} {
 	case BinaryExpr:
 		return i.evaluateBinaryExpr(v)
 	case UnaryExpr:
-		return v.evaluate()
+		return i.evaluateUnaryExpr(v)
 	case GroupExpr:
 		return v.evaluate()
 	case LiteralExpr:
@@ -31,6 +31,20 @@ func (i *Interpreter) interpret(s interface{}) interface{} {
 		return i.evaluateExprStmt(v)
 	case BlockStmt:
 		return i.evaluateBlockStmt(v, NewEnv(i.env))
+	case IfStmt:
+		return i.evaluateIfStmt(v)
+	case LogicalExpr:
+		return i.evaluateLogicalStmt(v)
+	}
+	return nil
+}
+
+func (i *Interpreter) evaluateUnaryExpr(u UnaryExpr) interface{} {
+	switch u.operator.kind {
+	case MINUS:
+		return -1 * i.interpret(u.right).(float64)
+	case BANG:
+		return !i.interpret(u.right).(bool)
 	}
 	return nil
 }
@@ -103,4 +117,26 @@ func (i *Interpreter) evaluateBlockStmt(v BlockStmt, e *Env) interface{} {
 	}
 	i.env = previousEnv
 	return nil
+}
+
+func (i *Interpreter) evaluateIfStmt(v IfStmt) interface{} {
+	// TODO: support more condition check, eg: string, float...
+	if i.interpret(v.condition).(bool) {
+		i.interpret(v.thenBranch)
+	} else if v.elseBranch != nil {
+		i.interpret(v.elseBranch)
+	}
+	return nil
+}
+
+func (i *Interpreter) evaluateLogicalStmt(v LogicalExpr) interface{} {
+	left := i.interpret(v.left).(bool)
+	if v.operator.kind == OR {
+		if left {
+			return true
+		}
+	} else if !left {
+		return false
+	}
+	return i.interpret(v.right).(bool)
 }

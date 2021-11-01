@@ -42,10 +42,30 @@ func (p *Parser) varDeclaration() Stmt {
 }
 
 func (p *Parser) statement() Stmt {
+	if p.match(IF) {
+		return p.ifStmt()
+	}
 	if p.match(LEFT_BRACE) {
 		return BlockStmt{stmts: p.blockStmt()}
 	}
 	return p.expressionStmt()
+}
+
+func (p *Parser) ifStmt() Stmt {
+	p.consume(LEFT_PAREN, "expect ( after if")
+	condition := p.expression()
+	p.consume(RIGHT_PAREN, "expect ) after condition")
+
+	thenBranch := p.statement()
+	var elseBranch Stmt
+	if p.match(ELSE) {
+		elseBranch = p.statement()
+	}
+	return IfStmt{
+		condition:  condition,
+		thenBranch: thenBranch,
+		elseBranch: elseBranch,
+	}
 }
 
 func (p *Parser) blockStmt() []Stmt {
@@ -67,8 +87,36 @@ func (p *Parser) expression() Expr {
 	return p.assignment()
 }
 
-func (p *Parser) assignment() Expr {
+func (p *Parser) or() Expr {
+	ex := p.and()
+	for p.match(OR) {
+		token := p.previous()
+		right := p.and()
+		ex = LogicalExpr{
+			left:     ex,
+			right:    right,
+			operator: token,
+		}
+	}
+	return ex
+}
+
+func (p *Parser) and() Expr {
 	ex := p.equality()
+	for p.match(AND) {
+		token := p.previous()
+		right := p.equality()
+		ex = LogicalExpr{
+			left:     ex,
+			right:    right,
+			operator: token,
+		}
+	}
+	return ex
+}
+
+func (p *Parser) assignment() Expr {
+	ex := p.or()
 
 	if p.match(EQUAL) {
 		equals := p.previous()
