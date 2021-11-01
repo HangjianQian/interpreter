@@ -11,6 +11,9 @@ type VarStmt struct {
 	initializer Expr
 }
 
-type IfStmt struct {
+type BlockStmt struct {
+	stmts []Stmt
+}
 
+type IfStmt struct {
 }

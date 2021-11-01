@@ -42,7 +42,19 @@ func (p *Parser) varDeclaration() Stmt {
 }
 
 func (p *Parser) statement() Stmt {
+	if p.match(LEFT_BRACE) {
+		return BlockStmt{stmts: p.blockStmt()}
+	}
 	return p.expressionStmt()
+}
+
+func (p *Parser) blockStmt() []Stmt {
+	var stmts []Stmt
+	for !p.check(RIGHT_BRACE) && !p.isAtEnd() {
+		stmts = append(stmts, p.declaration())
+	}
+	p.consume(RIGHT_BRACE, "expect right brace")
+	return stmts
 }
 
 func (p *Parser) expressionStmt() Stmt {

@@ -6,7 +6,7 @@ type Interpreter struct {
 
 func NewInterpreter() *Interpreter {
 	return &Interpreter{
-		env: NewEnv(),
+		env: NewEnv(nil),
 	}
 }
 
@@ -29,6 +29,8 @@ func (i *Interpreter) interpret(s interface{}) interface{} {
 		return i.evaluateVarStmt(v)
 	case ExprStmt:
 		return i.evaluateExprStmt(v)
+	case BlockStmt:
+		return i.evaluateBlockStmt(v, NewEnv(i.env))
 	}
 	return nil
 }
@@ -90,5 +92,15 @@ func (i *Interpreter) evaluateVarStmt(v VarStmt) interface{} {
 
 func (i *Interpreter) evaluateExprStmt(v ExprStmt) interface{} {
 	i.interpret(v.expr)
+	return nil
+}
+
+func (i *Interpreter) evaluateBlockStmt(v BlockStmt, e *Env) interface{} {
+	previousEnv := i.env
+	i.env = e
+	for _, stmt := range v.stmts {
+		i.interpret(stmt)
+	}
+	i.env = previousEnv
 	return nil
 }
