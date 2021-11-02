@@ -42,6 +42,9 @@ func (p *Parser) varDeclaration() Stmt {
 }
 
 func (p *Parser) statement() Stmt {
+	if p.match(FOR) {
+		return p.forStmt()
+	}
 	if p.match(IF) {
 		return p.ifStmt()
 	}
@@ -52,6 +55,54 @@ func (p *Parser) statement() Stmt {
 		return BlockStmt{stmts: p.blockStmt()}
 	}
 	return p.expressionStmt()
+}
+
+func (p *Parser) forStmt() Stmt {
+	// TODO: desugaring
+	p.consume(LEFT_PAREN, "expect ( after for")
+	var initializer Stmt
+	if p.match(SEMICOLON) {
+		initializer = nil
+	} else if p.match(VAR) {
+		initializer = p.varDeclaration()
+	} else {
+		initializer = p.expressionStmt()
+	}
+
+	var condition Expr
+	if !p.check(SEMICOLON) {
+		condition = p.expression()
+	}
+	p.consume(SEMICOLON, "expect ; after loop condition")
+
+	var increment Expr
+	if !p.check(RIGHT_PAREN) {
+		increment = p.expression()
+	}
+	p.consume(RIGHT_PAREN, "expect ) after loop condition")
+
+	body := p.statement()
+
+	if increment != nil {
+		body = BlockStmt{
+			stmts: []Stmt{body, ExprStmt{expr: increment}},
+		}
+	}
+
+	if condition == nil {
+		condition = LiteralExpr{true}
+	}
+	body = WhileStmt{
+		condition: condition,
+		body:      body,
+	}
+
+	if initializer != nil {
+		body = BlockStmt{
+			stmts: []Stmt{initializer, body},
+		}
+	}
+	return body
 }
 
 func (p *Parser) ifStmt() Stmt {
