@@ -37,8 +37,8 @@ func (f FuncStmt) arity() int {
 
 func (f FuncStmt) call(i *Interpreter, args []interface{}) interface{} {
 	env := NewEnv(i.env)
-	for idx, a := range f.params {
-		env.define(f.params[idx].lexeme, a)
+	for idx, _ := range f.params {
+		env.define(f.params[idx].lexeme, args[idx])
 	}
 
 	i.evaluateBlockStmt(BlockStmt{f.body}, env)
