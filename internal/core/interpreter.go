@@ -1,13 +1,20 @@
 package core
 
+import "fmt"
+
 type Interpreter struct {
 	env *Env
 }
 
 func NewInterpreter() *Interpreter {
-	return &Interpreter{
+	i := &Interpreter{
 		env: NewEnv(nil),
 	}
+
+	i.env.define("clock", clockFunc{})
+	i.env.define("println", printlnFunc{})
+
+	return i
 }
 
 func (i *Interpreter) interpret(s interface{}) interface{} {
@@ -27,6 +34,8 @@ func (i *Interpreter) interpret(s interface{}) interface{} {
 		return i.evaluateVarExpr(v)
 	case LogicalExpr:
 		return i.evaluateLogicalStmt(v)
+	case CallExpr:
+		return i.evaluateCallExpr(v)
 	case VarStmt:
 		return i.evaluateVarStmt(v)
 	case ExprStmt:
@@ -37,6 +46,8 @@ func (i *Interpreter) interpret(s interface{}) interface{} {
 		return i.evaluateIfStmt(v)
 	case WhileStmt:
 		return i.evaluateWhileStmt(v)
+	case FuncStmt:
+		return i.evaluateFuncStmt(v)
 	}
 	return nil
 }
@@ -147,5 +158,28 @@ func (i *Interpreter) evaluateWhileStmt(v WhileStmt) interface{} {
 	for i.interpret(v.condition).(bool) {
 		i.interpret(v.body)
 	}
+	return nil
+}
+
+func (i *Interpreter) evaluateCallExpr(v CallExpr) interface{} {
+	callee := i.interpret(v.callee)
+
+	var args []interface{}
+	for _, a := range v.args {
+		args = append(args, i.interpret(a))
+	}
+	if fn, ok := callee.(Callalble); ok {
+		if fn.arity() != len(args) {
+			panic(fmt.Sprintf("args num not match, require %d, got %d, line %d", fn.arity(), len(args), v.paren.line))
+		}
+		return fn.call(i, args)
+	} else {
+		panic(fmt.Sprintf("invalid fun call at line %d", v.paren.line))
+	}
+}
+
+func (i *Interpreter) evaluateFuncStmt(v FuncStmt) interface{} {
+	fn := v
+	i.env.define(fn.name.lexeme, fn)
 	return nil
 }

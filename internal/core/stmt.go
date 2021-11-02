@@ -25,3 +25,9 @@ type WhileStmt struct {
 	condition Expr
 	body      Stmt
 }
+
+type FuncStmt struct {
+	name   Token
+	params []Token
+	body   []Stmt
+}

@@ -62,7 +62,7 @@ var KEYWORDS = map[string]TokenKind{
 	"if":     IF,
 	"nil":    NIL,
 	"or":     OR,
-	"print":  PRINT,
+	// "print":  PRINT,
 	"return": RETURN,
 	"super":  SUPER,
 	"this":   THIS,

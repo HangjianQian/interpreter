@@ -90,6 +90,12 @@ type LogicalExpr struct {
 	operator Token
 }
 
+type CallExpr struct {
+	callee Expr
+	paren  Token
+	args   []Expr
+}
+
 // deprecate
 func evaluate(e Expr) interface{} {
 	switch v := e.(type) {

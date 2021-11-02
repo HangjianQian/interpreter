@@ -24,10 +24,34 @@ func (p *Parser) doParse() []Stmt {
 }
 
 func (p *Parser) declaration() Stmt {
+	if p.match(FUN) {
+		return p.function("function")
+	}
 	if p.match(VAR) {
 		return p.varDeclaration()
 	}
 	return p.statement()
+}
+
+func (p *Parser) function(kind string) Stmt {
+	name := p.consume(IDENTIFIER, "expect "+kind+" name.")
+	p.consume(LEFT_PAREN, "expect ( after "+kind+" name.")
+	var params []Token
+	if !p.check(RIGHT_PAREN) {
+		params = append(params, p.consume(IDENTIFIER, "expect param name"))
+		for p.match(COMMA) {
+			params = append(params, p.consume(IDENTIFIER, "expect param name"))
+		}
+	}
+	p.consume(RIGHT_PAREN, "expect ) after params")
+	p.consume(LEFT_BRACE, "expect { before body")
+
+	body := p.blockStmt()
+	return FuncStmt{
+		name:   name,
+		params: params,
+		body:   body,
+	}
 }
 
 func (p *Parser) varDeclaration() Stmt {
@@ -58,7 +82,6 @@ func (p *Parser) statement() Stmt {
 }
 
 func (p *Parser) forStmt() Stmt {
-	// TODO: desugaring
 	p.consume(LEFT_PAREN, "expect ( after for")
 	var initializer Stmt
 	if p.match(SEMICOLON) {
@@ -262,7 +285,36 @@ func (p *Parser) unary() Expr {
 			right:    ex,
 		}
 	}
-	return p.primary()
+	return p.call()
+}
+
+func (p *Parser) call() Expr {
+	ex := p.primary()
+	for {
+		if p.match(LEFT_PAREN) {
+			ex = p.finishCall(ex)
+		} else {
+			break
+		}
+	}
+
+	return ex
+}
+
+func (p *Parser) finishCall(callee Expr) Expr {
+	var args []Expr
+	if !p.check(RIGHT_PAREN) {
+		args = append(args, p.expression())
+		for p.match(COMMA) {
+			args = append(args, p.expression())
+		}
+	}
+	p.consume(RIGHT_PAREN, "expect ) after func call")
+	return CallExpr{
+		callee: callee,
+		paren:  p.previous(),
+		args:   args,
+	}
 }
 
 func (p *Parser) primary() Expr {
