@@ -41,5 +41,9 @@ func (f FuncStmt) call(i *Interpreter, args []interface{}) interface{} {
 		env.define(f.params[idx].lexeme, args[idx])
 	}
 
-	return i.evaluateBlockStmt(BlockStmt{f.body}, env)
+	err := i.evaluateBlockStmt(BlockStmt{f.body}, env)
+	if v, ok := err.(ReturnErr); ok {
+		return v.value
+	}
+	return err
 }

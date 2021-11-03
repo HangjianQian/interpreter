@@ -141,7 +141,7 @@ func (i *Interpreter) evaluateBlockStmt(v BlockStmt, e *Env) interface{} {
 	}
 	i.env = previousEnv
 	if returnOK {
-		return err.value
+		return err
 	}
 	return nil
 }

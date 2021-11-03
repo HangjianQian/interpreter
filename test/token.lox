@@ -1,6 +1,8 @@
 fun fc(arg) {
     println(arg);
-    return "hello again!";
+    {
+        return "hello again!";
+    }
 }
 
 var a = 233;
