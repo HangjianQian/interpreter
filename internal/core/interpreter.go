@@ -48,6 +48,8 @@ func (i *Interpreter) interpret(s interface{}) interface{} {
 		return i.evaluateWhileStmt(v)
 	case FuncStmt:
 		return i.evaluateFuncStmt(v)
+	case ReturnStmt:
+		return i.evaluateReturnStmt(v)
 	}
 	return nil
 }
@@ -125,10 +127,22 @@ func (i *Interpreter) evaluateExprStmt(v ExprStmt) interface{} {
 func (i *Interpreter) evaluateBlockStmt(v BlockStmt, e *Env) interface{} {
 	previousEnv := i.env
 	i.env = e
+	var (
+		err      ReturnErr
+		returnOK bool
+	)
 	for _, stmt := range v.stmts {
-		i.interpret(stmt)
+		t := i.interpret(stmt)
+		if t != nil {
+			if err, returnOK = t.(ReturnErr); returnOK {
+				break
+			}
+		}
 	}
 	i.env = previousEnv
+	if returnOK {
+		return err.value
+	}
 	return nil
 }
 
@@ -182,4 +196,11 @@ func (i *Interpreter) evaluateFuncStmt(v FuncStmt) interface{} {
 	fn := v
 	i.env.define(fn.name.lexeme, fn)
 	return nil
+}
+
+func (i *Interpreter) evaluateReturnStmt(v ReturnStmt) interface{} {
+	if v.value != nil {
+		return ReturnErr{value: i.interpret(v.value)}
+	}
+	return ReturnErr{value: nil}
 }

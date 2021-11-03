@@ -31,3 +31,8 @@ type FuncStmt struct {
 	params []Token
 	body   []Stmt
 }
+
+type ReturnStmt struct {
+	keyword Token
+	value   Expr
+}

@@ -69,6 +69,9 @@ func (p *Parser) statement() Stmt {
 	if p.match(FOR) {
 		return p.forStmt()
 	}
+	if p.match(RETURN) {
+		return p.returnStmt()
+	}
 	if p.match(IF) {
 		return p.ifStmt()
 	}
@@ -79,6 +82,19 @@ func (p *Parser) statement() Stmt {
 		return BlockStmt{stmts: p.blockStmt()}
 	}
 	return p.expressionStmt()
+}
+
+func (p *Parser) returnStmt() Stmt {
+	token := p.previous()
+	var value Expr
+	if !p.check(SEMICOLON) {
+		value = p.expression()
+	}
+	p.consume(SEMICOLON, "expect ; after return")
+	return ReturnStmt{
+		keyword: token,
+		value:   value,
+	}
 }
 
 func (p *Parser) forStmt() Stmt {

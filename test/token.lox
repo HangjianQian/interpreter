@@ -1,5 +1,6 @@
 fun fc(arg) {
     println(arg);
+    return "hello again!";
 }
 
 var a = 233;
@@ -10,3 +11,4 @@ for (;c<1000;c = c+1) {
 }
 println(c);
 fc("hello");
+println(fc(""));
