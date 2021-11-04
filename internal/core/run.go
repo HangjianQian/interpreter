@@ -35,16 +35,17 @@ func run(source string) {
 
 	scan.scanTokens()
 
-	for _, v := range scan.tokens {
-		fmt.Printf("token: %+v\n", v)
-	}
+	// for _, v := range scan.tokens {
+	// 	fmt.Printf("token: %+v\n", v)
+	// }
 
 	parser := NewParser(scan.tokens)
 	stmts := parser.doParse()
-	fmt.Printf("stmt s%+v\n", stmts)
+	// fmt.Printf("stmt s%+v\n", stmts)
 
 	inter := NewInterpreter()
 	for _, s := range stmts {
-		fmt.Printf("res: %v\n", inter.interpret(s))
+		inter.interpret(s)
+		// fmt.Printf("res: %v\n", inter.interpret(s))
 	}
 }

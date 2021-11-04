@@ -193,6 +193,7 @@ func (i *Interpreter) evaluateCallExpr(v CallExpr) interface{} {
 }
 
 func (i *Interpreter) evaluateFuncStmt(v FuncStmt) interface{} {
+	v.closure = i.env
 	fn := v
 	i.env.define(fn.name.lexeme, fn)
 	return nil

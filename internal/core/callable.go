@@ -36,7 +36,7 @@ func (f FuncStmt) arity() int {
 }
 
 func (f FuncStmt) call(i *Interpreter, args []interface{}) interface{} {
-	env := NewEnv(i.env)
+	env := NewEnv(f.closure)
 	for idx := range f.params {
 		env.define(f.params[idx].lexeme, args[idx])
 	}

@@ -27,9 +27,10 @@ type WhileStmt struct {
 }
 
 type FuncStmt struct {
-	name   Token
-	params []Token
-	body   []Stmt
+	name    Token
+	params  []Token
+	body    []Stmt
+	closure *Env
 }
 
 type ReturnStmt struct {
