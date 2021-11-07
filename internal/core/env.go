@@ -1,6 +1,8 @@
 package core
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Env struct {
 	enclosing *Env
@@ -39,4 +41,20 @@ func (e *Env) get(t Token) interface{} {
 		return e.enclosing.get(t)
 	}
 	panic(fmt.Sprintf("get, map key not exist: %s", t.lexeme))
+}
+
+func (e *Env) getAt(distance int, name string) interface{} {
+	return e.ancestor(distance).values[name]
+}
+
+func (e *Env) assignAt(distance int, name string, v interface{}) {
+	e.ancestor(distance).values[name] = v
+}
+
+func (e *Env) ancestor(distance int) *Env {
+	var en *Env = e
+	for i := 0; i < distance; i++ {
+		en = en.enclosing
+	}
+	return en
 }

@@ -1,5 +1,4 @@
 fun fc(arg) {
-    println(arg);
     {
         return "hello again!";
     }
@@ -27,3 +26,13 @@ fun fd()  {
 var f = fd();
 println(f());
 println(f());
+
+{
+    fun showA() {
+        println(a);
+    }
+
+    showA();
+    var a = "block";
+    showA();
+}

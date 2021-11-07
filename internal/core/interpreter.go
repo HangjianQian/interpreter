@@ -3,18 +3,24 @@ package core
 import "fmt"
 
 type Interpreter struct {
-	env *Env
+	globals *Env
+	locals  map[Expr]int
 }
 
 func NewInterpreter() *Interpreter {
 	i := &Interpreter{
-		env: NewEnv(nil),
+		globals: NewEnv(nil),
+		locals:  make(map[Expr]int),
 	}
 
-	i.env.define("clock", clockFunc{})
-	i.env.define("println", printlnFunc{})
+	i.globals.define("clock", clockFunc{})
+	i.globals.define("println", printlnFunc{})
 
 	return i
+}
+
+func (i *Interpreter) resolve(ex Expr, depth int) {
+	i.locals[ex] = depth
 }
 
 func (i *Interpreter) interpret(s interface{}) interface{} {
@@ -41,7 +47,7 @@ func (i *Interpreter) interpret(s interface{}) interface{} {
 	case ExprStmt:
 		return i.evaluateExprStmt(v)
 	case BlockStmt:
-		return i.evaluateBlockStmt(v, NewEnv(i.env))
+		return i.evaluateBlockStmt(v, NewEnv(i.globals))
 	case IfStmt:
 		return i.evaluateIfStmt(v)
 	case WhileStmt:
@@ -66,7 +72,11 @@ func (i *Interpreter) evaluateUnaryExpr(u UnaryExpr) interface{} {
 
 func (i *Interpreter) evaluateAssignExpr(a AssignExpr) interface{} {
 	value := i.interpret(a.value)
-	i.env.assign(a.name, value)
+	if distance, ok := i.locals[a]; ok {
+		i.globals.assignAt(distance, a.name.lexeme, value)
+	} else {
+		i.globals.assign(a.name, value)
+	}
 	return value
 }
 
@@ -107,7 +117,15 @@ func (i *Interpreter) evaluateBinaryExpr(b BinaryExpr) interface{} {
 }
 
 func (i *Interpreter) evaluateVarExpr(v VarExpr) interface{} {
-	return i.env.get(v.name)
+	return i.lookUpVar(v.name, v)
+}
+
+func (i *Interpreter) lookUpVar(name Token, ex Expr) interface{} {
+	if distance, ok := i.locals[ex]; ok {
+		return i.globals.getAt(distance, name.lexeme)
+	} else {
+		return i.globals.get(name)
+	}
 }
 
 func (i *Interpreter) evaluateVarStmt(v VarStmt) interface{} {
@@ -115,7 +133,7 @@ func (i *Interpreter) evaluateVarStmt(v VarStmt) interface{} {
 	if v.initializer != nil {
 		obj = i.interpret(v.initializer)
 	}
-	i.env.define(v.name.lexeme, obj)
+	i.globals.define(v.name.lexeme, obj)
 	return nil
 }
 
@@ -125,8 +143,8 @@ func (i *Interpreter) evaluateExprStmt(v ExprStmt) interface{} {
 }
 
 func (i *Interpreter) evaluateBlockStmt(v BlockStmt, e *Env) interface{} {
-	previousEnv := i.env
-	i.env = e
+	previousEnv := i.globals
+	i.globals = e
 	var (
 		err      ReturnErr
 		returnOK bool
@@ -139,7 +157,7 @@ func (i *Interpreter) evaluateBlockStmt(v BlockStmt, e *Env) interface{} {
 			}
 		}
 	}
-	i.env = previousEnv
+	i.globals = previousEnv
 	if returnOK {
 		return err
 	}
@@ -193,9 +211,9 @@ func (i *Interpreter) evaluateCallExpr(v CallExpr) interface{} {
 }
 
 func (i *Interpreter) evaluateFuncStmt(v FuncStmt) interface{} {
-	v.closure = i.env
+	v.closure = i.globals
 	fn := v
-	i.env.define(fn.name.lexeme, fn)
+	i.globals.define(fn.name.lexeme, fn)
 	return nil
 }
 

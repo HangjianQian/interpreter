@@ -44,6 +44,10 @@ func run(source string) {
 	// fmt.Printf("stmt s%+v\n", stmts)
 
 	inter := NewInterpreter()
+
+	resolver := NewResolver(inter)
+	resolver.resolve(BlockStmt{stmts: stmts})
+
 	for _, s := range stmts {
 		inter.interpret(s)
 		// fmt.Printf("res: %v\n", inter.interpret(s))
