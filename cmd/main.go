@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	core.RunFile("/Users/qianhangjian/interpreter/test/closure.lox")
+	core.RunFile("/Users/qianhangjian/interpreter/test/fib.lox")
 	return
 
 	if len(os.Args) > 2 {

@@ -167,9 +167,9 @@ func (i *Interpreter) evaluateBlockStmt(v BlockStmt, e *Env) interface{} {
 func (i *Interpreter) evaluateIfStmt(v IfStmt) interface{} {
 	// TODO: support more condition check, eg: string, float...
 	if i.interpret(v.condition).(bool) {
-		i.interpret(v.thenBranch)
+		return i.interpret(v.thenBranch)
 	} else if v.elseBranch != nil {
-		i.interpret(v.elseBranch)
+		return i.interpret(v.elseBranch)
 	}
 	return nil
 }

@@ -201,7 +201,7 @@ func (r *Resolver) resolveFunction(fc FuncStmt) interface{} {
 	r.beginScope()
 	for _, arg := range fc.params {
 		r.declare(arg)
-		r.declare(arg)
+		r.define(arg)
 	}
 	r.resolve(fc.body)
 	r.endScope()
